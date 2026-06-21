@@ -127,11 +127,25 @@ Populated by `evaluation/run_eval.py` → `results/eval_report.md`.
 
 _To fill in after the run: where DPO helped vs SFT, judge reliability, cost/latency trade-offs._
 
-## Dataset note
+## Dataset
 
-Campaign metrics are **synthetic by default** — correlated, realistic ad metrics
-(CTR by channel, CVR by objective, derived CPA/ROAS). The agent only ever sees
-aggregated metrics, so synthetic data is faithful to the task. Set
-`--source criteo` to instead aggregate the public
-[Criteo Display Advertising Challenge](https://www.kaggle.com/c/criteo-display-ad-challenge)
-dataset into pseudo-campaigns.
+The agent only ever sees **aggregated campaign metrics** (CTR, CPC, budget,
+ROAS…), so the data layer just needs to produce a realistic table of those. Two
+interchangeable sources, same output schema:
+
+- **`--source synthetic`** (default) — correlated, plausible metrics: CTR modeled
+  per channel, CVR per objective, funnel economics derived. Instant, no download.
+- **`--source criteo`** — **CTR is sourced empirically** from the public
+  [Criteo Display Advertising Challenge](https://ailab.criteo.com/display-advertising-challenge-criteo/)
+  (real click labels, aggregated into per-segment pseudo-campaigns); the campaign
+  economics are then modeled the same way as synthetic. So the realistic part —
+  the CTR distribution — comes from real ad-serving data.
+
+```bash
+# Stream just what's needed (~0.9 GB, not the full 4.58 GB archive)
+scripts/get_criteo.sh                 # -> data/raw/train.txt (first 1.5M rows)
+PYTHONPATH=src python -m marketing_agent.data_prep --source criteo --n 400
+```
+
+Both paths share `_assemble()` in [data_prep.py](src/marketing_agent/data_prep.py),
+so switching source never changes the downstream pipeline.
