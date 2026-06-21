@@ -1,0 +1,8 @@
+# Install on Colab (GPU). Pinned loosely; Colab already ships a recent torch+CUDA.
+torch>=2.3
+transformers>=4.44
+trl>=0.11
+peft>=0.13
+datasets>=2.20
+accelerate>=0.34
+bitsandbytes>=0.43   # 4-bit QLoRA so a 3B model fits a free T4

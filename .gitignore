@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+
+# Data (large / generated) — keep dir structure via .gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+# Preference pairs ARE committed (small, the core artifact) — see data/preferences/
+
+# Training artifacts
+training/outputs/
+*.safetensors
+*.bin
+checkpoints/
+
+# Results: commit JSON/markdown, ignore heavy logs
+results/wandb/
+results/*.log
+
+# OS
+.DS_Store
