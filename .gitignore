@@ -22,9 +22,10 @@ training/outputs/
 *.bin
 checkpoints/
 
-# Results: commit JSON/markdown, ignore heavy logs
+# Results: commit JSON/markdown, ignore heavy logs + the LLM response cache
 results/wandb/
 results/*.log
+results/.llm_cache/
 
 # OS
 .DS_Store
