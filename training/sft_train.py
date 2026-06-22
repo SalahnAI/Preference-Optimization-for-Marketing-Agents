@@ -75,7 +75,7 @@ def main() -> None:
         logging_steps=10,
         save_strategy="epoch",
         bf16=True,
-        max_seq_length=1024,
+        max_length=1024,
         report_to="none",
     )
     trainer = SFTTrainer(model=model, args=cfg, train_dataset=ds,
