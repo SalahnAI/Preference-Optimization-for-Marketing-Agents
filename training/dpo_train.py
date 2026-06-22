@@ -13,6 +13,7 @@ task format. Run on Colab (GPU):
 from __future__ import annotations
 
 import argparse
+import dataclasses
 
 import torch
 from datasets import load_dataset
@@ -21,6 +22,16 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import DPOConfig, DPOTrainer
 
 from prompts_shared import SYSTEM_PROMPT
+
+
+def supported(config_cls, **kwargs):
+    """Keep only kwargs this TRL version's config accepts (the SFT/DPO config
+    fields drift across TRL releases — e.g. max_seq_length, max_prompt_length)."""
+    valid = {f.name for f in dataclasses.fields(config_cls)}
+    dropped = sorted(set(kwargs) - valid)
+    if dropped:
+        print(f"[compat] {config_cls.__name__}: ignoring unsupported args {dropped}")
+    return {k: v for k, v in kwargs.items() if k in valid}
 
 
 def format_for_dpo(example, tokenizer):
@@ -64,7 +75,8 @@ def main() -> None:
                 remove_columns=[c for c in ds.column_names
                                 if c not in ("prompt", "chosen", "rejected")])
 
-    cfg = DPOConfig(
+    cfg = DPOConfig(**supported(
+        DPOConfig,
         output_dir=args.out,
         num_train_epochs=args.epochs,
         per_device_train_batch_size=2,
@@ -77,7 +89,7 @@ def main() -> None:
         max_length=1024,
         max_prompt_length=640,
         report_to="none",
-    )
+    ))
     # New LoRA on top so DPO trains its own delta; ref = this disabled.
     lora = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none",
                       task_type="CAUSAL_LM",
