@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 _SRC = Path(__file__).resolve().parents[1] / "src"
 sys.path.insert(0, str(_SRC))
@@ -43,8 +43,15 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(args.base)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
+    # Load the base in 4-bit, exactly as training did, so the comparison is fair
+    # and PEFT injects the adapter via the bitsandbytes backend (avoids the
+    # torchao dispatch path that fails on older torchao).
+    bnb = BitsAndBytesConfig(
+        load_in_4bit=True, bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
     model = AutoModelForCausalLM.from_pretrained(
-        args.base, device_map="auto", torch_dtype=torch.bfloat16)
+        args.base, quantization_config=bnb, device_map="auto",
+        torch_dtype=torch.bfloat16)
     if args.adapter:
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
