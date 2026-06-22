@@ -17,7 +17,7 @@ import dataclasses
 
 import torch
 from datasets import load_dataset
-from peft import LoraConfig, PeftModel
+from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import DPOConfig, DPOTrainer
 
@@ -66,8 +66,10 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         args.base, quantization_config=bnb, device_map="auto",
         torch_dtype=torch.bfloat16)
-    # Load SFT adapter as the trainable starting point. TRL builds the frozen
-    # reference policy internally (ref = policy with adapter disabled).
+    # Continue training the SFT adapter itself with the DPO objective (no new
+    # adapter — recent TRL forbids PeftModel + peft_config, and merging a 4-bit
+    # QLoRA base is impractical). TRL builds the frozen reference policy by
+    # disabling this adapter, i.e. ref = the base model.
     model = PeftModel.from_pretrained(model, args.sft_adapter, is_trainable=True)
 
     ds = load_dataset("json", data_files=args.data, split="train")
@@ -90,12 +92,8 @@ def main() -> None:
         max_prompt_length=640,
         report_to="none",
     ))
-    # New LoRA on top so DPO trains its own delta; ref = this disabled.
-    lora = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none",
-                      task_type="CAUSAL_LM",
-                      target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
     trainer = DPOTrainer(model=model, args=cfg, train_dataset=ds,
-                         processing_class=tok, peft_config=lora)
+                         processing_class=tok)
     trainer.train()
     trainer.save_model(args.out)
     tok.save_pretrained(args.out)
