@@ -29,12 +29,34 @@ def campaign_block(c: Mapping) -> str:
 
 
 def recommendation_prompt(c: Mapping) -> str:
+    """The canonical prompt the model is trained and evaluated on."""
     return (
         "Campaign metrics:\n\n"
         f"{campaign_block(c)}\n\n"
         "Provide exactly 3 actionable recommendations, numbered 1-3. "
         "Each: one bold lever, then a quantitative justification tied to the "
         "metrics above (~2 sentences)."
+    )
+
+
+# --- Weak-candidate generation (Phase 2) ---
+# The `rejected` side of each preference pair. We deliberately produce GENERIC,
+# non-quantitative advice so there's a clear, learnable quality gap vs. the strong
+# candidate — along exactly the axes the judge scores (specificity, actionability).
+# Both candidates are stored as answers to the canonical prompt above; only their
+# generation recipe differs.
+WEAK_SYSTEM = (
+    "You are a generic marketing assistant. Give brief, high-level advice. "
+    "Keep it vague and conventional; do NOT cite the specific numbers, compute "
+    "anything, or tailor advice to this campaign in particular."
+)
+
+
+def weak_prompt(c: Mapping) -> str:
+    return (
+        "Here is a marketing campaign:\n\n"
+        f"{campaign_block(c)}\n\n"
+        "Give 3 short, general recommendations."
     )
 
 

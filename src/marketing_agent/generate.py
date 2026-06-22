@@ -17,9 +17,7 @@ from tqdm import tqdm
 
 from . import config
 from .gemini_client import Gemini
-from .prompts import SYSTEM_PROMPT, recommendation_prompt
-
-WEAK_SYSTEM = "You are a marketing assistant. Give some recommendations."
+from .prompts import SYSTEM_PROMPT, WEAK_SYSTEM, recommendation_prompt, weak_prompt
 
 
 def main() -> None:
@@ -39,7 +37,7 @@ def main() -> None:
         for _, c in tqdm(df.iterrows(), total=len(df), desc="generate"):
             prompt = recommendation_prompt(c)
             strong = gen.generate(prompt, system=SYSTEM_PROMPT, temperature=0.3)
-            weak = gen.generate(prompt, system=WEAK_SYSTEM, temperature=1.0)
+            weak = gen.generate(weak_prompt(c), system=WEAK_SYSTEM, temperature=1.0)
             f.write(json.dumps({
                 "campaign_id": c["campaign_id"],
                 "prompt": prompt,
