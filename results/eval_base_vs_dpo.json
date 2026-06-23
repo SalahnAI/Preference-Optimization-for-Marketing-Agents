@@ -1,0 +1,25 @@
+{
+  "model_a": "base",
+  "model_b": "dpo",
+  "win_rate_b_over_a": {
+    "n_compared": 24,
+    "b_wins": 24,
+    "a_wins": 0,
+    "ties": 0,
+    "b_win_rate": 1.0
+  },
+  "quality": {
+    "base": {
+      "actionability": 2.62,
+      "specificity": 1.46,
+      "business_value": 1.75,
+      "overall": 1.94
+    },
+    "dpo": {
+      "actionability": 4.46,
+      "specificity": 2.88,
+      "business_value": 3.12,
+      "overall": 3.49
+    }
+  }
+}

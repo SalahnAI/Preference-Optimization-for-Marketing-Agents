@@ -1,0 +1,48 @@
+{
+  "held_out": {
+    "n": 24,
+    "eval_seed": 99
+  },
+  "judge": "gemini-2.5-pro",
+  "inference": "local Apple M1 Max, Qwen2.5-3B-Instruct bf16/MPS (no 4-bit)",
+  "quality": {
+    "base": {
+      "actionability": 2.62,
+      "specificity": 1.46,
+      "business_value": 1.75,
+      "overall": 1.94
+    },
+    "sft": {
+      "actionability": 3.5,
+      "specificity": 2.83,
+      "business_value": 3.79,
+      "overall": 3.37
+    },
+    "dpo": {
+      "actionability": 4.46,
+      "specificity": 2.88,
+      "business_value": 3.12,
+      "overall": 3.49
+    }
+  },
+  "win_rate": {
+    "sft_over_base": {
+      "rate": 0.958,
+      "w": 23,
+      "l": 1,
+      "t": 0
+    },
+    "dpo_over_base": {
+      "rate": 1.0,
+      "w": 24,
+      "l": 0,
+      "t": 0
+    },
+    "dpo_over_sft": {
+      "rate": 0.75,
+      "w": 18,
+      "l": 6,
+      "t": 0
+    }
+  }
+}

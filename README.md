@@ -115,17 +115,34 @@ python evaluation/run_eval.py --a results/preds_base.jsonl --b results/preds_dpo
 
 ## Results
 
-Populated by `evaluation/run_eval.py` → `results/eval_report.md`.
+Populated by `evaluation/run_eval.py` → `results/eval_report.md`. Run below was
+done **locally on an Apple M1 Max** (Qwen2.5-3B-Instruct, bf16/MPS — no 4-bit) over a
+24-campaign held-out set (`eval_seed=99`), judged by gemini-2.5-pro.
+
+**Recommendation quality (LLM-as-judge, 1–5):**
 
 | Model | Actionability | Specificity | Business Value | Overall |
 |---|---|---|---|---|
-| base | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
-| sft  | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
-| dpo  | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| base | 2.62 | 1.46 | 1.75 | **1.94** |
+| sft  | 3.50 | 2.83 | 3.79 | **3.37** |
+| dpo  | 4.46 | 2.88 | 3.12 | **3.49** |
+
+**Pairwise preference win rate (position-swapped, n=24):** SFT over base **0.958**
+(23–1), DPO over base **1.000** (24–0), DPO over SFT **0.750** (18–6).
 
 ## Lessons learned
 
-_To fill in after the run: where DPO helped vs SFT, judge reliability, cost/latency trade-offs._
+- **SFT does the heavy lifting**: overall 1.94 → 3.37 and a 23/24 win vs base —
+  teaching the task format/style is most of the gain.
+- **DPO adds a real but smaller lift on top of SFT** (3.37 → 3.49, 18/24 head-to-head
+  win), concentrated in **actionability** (3.50 → 4.46) — exactly the axis the
+  strong-vs-weak preference pairs rewarded. It also makes outputs more concise.
+- **Trade-off**: DPO's *business_value* dips vs SFT (3.79 → 3.12), so the lift is
+  actionability-driven rather than uniform — worth watching if you re-weight the
+  preference signal.
+- **Judge reliability**: gemini-2.5-pro on the free tier is the bottleneck (~15–20 s
+  per call); local Apple-Silicon inference (~6.5 min per variant for 24 campaigns)
+  was actually the faster half of the loop.
 
 ## Dataset
 

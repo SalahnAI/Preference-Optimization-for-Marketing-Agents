@@ -1,0 +1,25 @@
+{
+  "model_a": "base",
+  "model_b": "sft",
+  "win_rate_b_over_a": {
+    "n_compared": 24,
+    "b_wins": 23,
+    "a_wins": 1,
+    "ties": 0,
+    "b_win_rate": 0.958
+  },
+  "quality": {
+    "base": {
+      "actionability": 2.62,
+      "specificity": 1.46,
+      "business_value": 1.75,
+      "overall": 1.94
+    },
+    "sft": {
+      "actionability": 3.5,
+      "specificity": 2.83,
+      "business_value": 3.79,
+      "overall": 3.37
+    }
+  }
+}

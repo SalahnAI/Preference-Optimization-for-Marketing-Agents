@@ -1,0 +1,25 @@
+{
+  "model_a": "sft",
+  "model_b": "dpo",
+  "win_rate_b_over_a": {
+    "n_compared": 24,
+    "b_wins": 18,
+    "a_wins": 6,
+    "ties": 0,
+    "b_win_rate": 0.75
+  },
+  "quality": {
+    "sft": {
+      "actionability": 3.5,
+      "specificity": 2.83,
+      "business_value": 3.79,
+      "overall": 3.37
+    },
+    "dpo": {
+      "actionability": 4.46,
+      "specificity": 2.88,
+      "business_value": 3.12,
+      "overall": 3.49
+    }
+  }
+}

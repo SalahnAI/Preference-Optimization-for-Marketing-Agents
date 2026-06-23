@@ -43,15 +43,24 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(args.base)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
-    # Load the base in 4-bit, exactly as training did, so the comparison is fair
-    # and PEFT injects the adapter via the bitsandbytes backend (avoids the
-    # torchao dispatch path that fails on older torchao).
-    bnb = BitsAndBytesConfig(
-        load_in_4bit=True, bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
-    model = AutoModelForCausalLM.from_pretrained(
-        args.base, quantization_config=bnb, device_map="auto",
-        torch_dtype=torch.bfloat16)
+    if torch.cuda.is_available():
+        # GPU path (Colab/EC2): load the base in 4-bit, exactly as training did,
+        # so the comparison is fair and PEFT injects the adapter via the
+        # bitsandbytes backend (avoids the torchao dispatch path that fails on
+        # older torchao).
+        bnb = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
+        model = AutoModelForCausalLM.from_pretrained(
+            args.base, quantization_config=bnb, device_map="auto",
+            torch_dtype=torch.bfloat16)
+    else:
+        # CPU / Apple-Silicon MPS path: bitsandbytes is CUDA-only, so load the
+        # base in bf16 (full precision LoRA, no 4-bit quant). A 3B model fits in
+        # ~6 GB of unified memory.
+        device = "mps" if torch.backends.mps.is_available() else "cpu"
+        model = AutoModelForCausalLM.from_pretrained(
+            args.base, torch_dtype=torch.bfloat16).to(device)
     if args.adapter:
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter)
